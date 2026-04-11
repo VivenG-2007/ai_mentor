@@ -1,0 +1,175 @@
+const Groq = require('groq-sdk');
+
+let groq;
+try {
+  groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+} catch (e) {
+  console.warn('⚠️  Groq SDK init failed, using mock responses');
+}
+
+const MODEL = 'llama3-8b-8192';
+
+// Generate a chat completion
+async function chatCompletion(messages, maxTokens = 1024) {
+  if (!groq || !process.env.GROQ_API_KEY) {
+    return getMockResponse(messages);
+  }
+  try {
+    const completion = await groq.chat.completions.create({
+      model: MODEL,
+      messages,
+      max_tokens: maxTokens,
+      temperature: 0.7,
+    });
+    return completion.choices[0]?.message?.content || '';
+  } catch (error) {
+    console.error('Groq API error:', error.message);
+    return getMockResponse(messages);
+  }
+}
+
+// Generate weekly session questions
+async function generateSessionQuestions(userProfile = {}) {
+  const prompt = `Generate a comprehensive weekly mentoring session with exactly 9 questions in valid JSON format.
+
+User profile: ${JSON.stringify(userProfile)}
+
+Return ONLY a JSON array with this exact structure (no markdown, no extra text):
+[
+  {"type":"subjective","subType":"general","questionText":"Question here","difficulty":"medium","order":1,"expectedDuration":120},
+  {"type":"subjective","subType":"general","questionText":"Question here","difficulty":"medium","order":2,"expectedDuration":120},
+  {"type":"subjective","subType":"behavioral","questionText":"Question here","difficulty":"medium","order":3,"expectedDuration":120},
+  {"type":"english","subType":"grammar","questionText":"Question here","difficulty":"easy","order":4,"expectedDuration":90},
+  {"type":"english","subType":"vocabulary","questionText":"Question here","difficulty":"medium","order":5,"expectedDuration":90},
+  {"type":"english","subType":"essay","questionText":"Question here","difficulty":"hard","order":6,"expectedDuration":180},
+  {"type":"psychometric","subType":"ocean","questionText":"Question here","difficulty":"easy","order":7,"expectedDuration":60,"trait":"openness"},
+  {"type":"psychometric","subType":"ocean","questionText":"Question here","difficulty":"easy","order":8,"expectedDuration":60,"trait":"conscientiousness"},
+  {"type":"psychometric","subType":"ocean","questionText":"Question here","difficulty":"easy","order":9,"expectedDuration":60,"trait":"extraversion"}
+]`;
+
+  const content = await chatCompletion([{ role: 'user', content: prompt }], 2048);
+  
+  try {
+    const cleaned = content.replace(/```json\n?|\n?```/g, '').trim();
+    const parsed = JSON.parse(cleaned);
+    return Array.isArray(parsed) ? parsed : getMockQuestions();
+  } catch {
+    return getMockQuestions();
+  }
+}
+
+// Evaluate a user answer
+async function evaluateAnswer(question, answer, questionType) {
+  const prompt = `Evaluate this answer and return ONLY valid JSON (no markdown):
+
+Question Type: ${questionType}
+Question: ${question}
+Answer: ${answer}
+
+Return this exact JSON structure:
+{
+  "score": <0-100>,
+  "feedback": "<specific feedback>",
+  "strengths": ["<strength1>", "<strength2>"],
+  "improvements": ["<area1>", "<area2>"],
+  "grammarScore": <0-100>,
+  "vocabularyScore": <0-100>,
+  "coherenceScore": <0-100>,
+  "personalityTraits": {
+    "openness": <0-100>,
+    "conscientiousness": <0-100>,
+    "extraversion": <0-100>,
+    "agreeableness": <0-100>,
+    "neuroticism": <0-100>
+  }
+}`;
+
+  const content = await chatCompletion([{ role: 'user', content: prompt }]);
+  
+  try {
+    const cleaned = content.replace(/```json\n?|\n?```/g, '').trim();
+    return JSON.parse(cleaned);
+  } catch {
+    return getMockEvaluation();
+  }
+}
+
+// Generate session summary
+async function generateSessionSummary(sessionData) {
+  const prompt = `Generate a concise session performance summary as JSON:
+
+Session Data: ${JSON.stringify(sessionData)}
+
+Return this exact JSON (no markdown):
+{
+  "overallFeedback": "<2-3 sentences summary>",
+  "strengths": ["<strength1>", "<strength2>", "<strength3>"],
+  "improvements": ["<area1>", "<area2>", "<area3>"],
+  "personalityInsights": "<1-2 sentences about personality>",
+  "weeklyGoals": ["<goal1>", "<goal2>"]
+}`;
+
+  const content = await chatCompletion([{ role: 'user', content: prompt }]);
+  
+  try {
+    const cleaned = content.replace(/```json\n?|\n?```/g, '').trim();
+    return JSON.parse(cleaned);
+  } catch {
+    return {
+      overallFeedback: 'You demonstrated strong engagement throughout the session.',
+      strengths: ['Clear communication', 'Thoughtful responses', 'Good time management'],
+      improvements: ['Expand vocabulary', 'Provide more specific examples', 'Develop analytical depth'],
+      personalityInsights: 'Your responses indicate high conscientiousness and openness to new ideas.',
+      weeklyGoals: ['Practice active listening', 'Review grammar fundamentals'],
+    };
+  }
+}
+
+// Mock fallbacks
+function getMockResponse(messages) {
+  return JSON.stringify({
+    score: 72,
+    feedback: 'Good response demonstrating understanding of the topic.',
+    strengths: ['Clear expression', 'Relevant points'],
+    improvements: ['Add more detail', 'Improve structure'],
+    grammarScore: 75,
+    vocabularyScore: 70,
+    coherenceScore: 72,
+    personalityTraits: { openness: 70, conscientiousness: 75, extraversion: 60, agreeableness: 80, neuroticism: 35 },
+  });
+}
+
+function getMockQuestions() {
+  return [
+    { type: 'subjective', subType: 'general', questionText: 'Describe your biggest professional achievement in the past year and what you learned from it.', difficulty: 'medium', order: 1, expectedDuration: 120 },
+    { type: 'subjective', subType: 'general', questionText: 'What are your primary goals for the next six months, and how do you plan to achieve them?', difficulty: 'medium', order: 2, expectedDuration: 120 },
+    { type: 'subjective', subType: 'behavioral', questionText: 'Tell me about a time you faced a significant challenge. How did you overcome it?', difficulty: 'medium', order: 3, expectedDuration: 120 },
+    { type: 'english', subType: 'grammar', questionText: 'Identify and correct any grammatical errors in this sentence: "Neither the manager nor the employees was present at the meeting what was scheduled for Monday."', difficulty: 'easy', order: 4, expectedDuration: 90 },
+    { type: 'english', subType: 'vocabulary', questionText: 'Use the words "ephemeral", "resilient", and "pragmatic" in separate sentences that demonstrate their meaning.', difficulty: 'medium', order: 5, expectedDuration: 90 },
+    { type: 'english', subType: 'essay', questionText: 'Write a short essay (150-200 words) on: "The role of technology in modern education – benefits and challenges."', difficulty: 'hard', order: 6, expectedDuration: 180 },
+    { type: 'psychometric', subType: 'ocean', questionText: 'How often do you seek out new experiences, explore creative ideas, or engage with abstract concepts? Describe with an example.', difficulty: 'easy', order: 7, expectedDuration: 60, trait: 'openness' },
+    { type: 'psychometric', subType: 'ocean', questionText: 'How do you typically plan and organize your tasks? Do you prefer structure or flexibility in your work approach?', difficulty: 'easy', order: 8, expectedDuration: 60, trait: 'conscientiousness' },
+    { type: 'psychometric', subType: 'ocean', questionText: 'Describe your social energy. Do you feel energized by social interactions, or do you prefer working independently?', difficulty: 'easy', order: 9, expectedDuration: 60, trait: 'extraversion' },
+  ];
+}
+
+function getMockEvaluation() {
+  return {
+    score: Math.floor(Math.random() * 30) + 60,
+    feedback: 'Good response with clear structure and relevant insights.',
+    strengths: ['Clear communication', 'Relevant examples'],
+    improvements: ['Add more depth', 'Strengthen vocabulary'],
+    grammarScore: Math.floor(Math.random() * 20) + 70,
+    vocabularyScore: Math.floor(Math.random() * 20) + 65,
+    coherenceScore: Math.floor(Math.random() * 20) + 68,
+    personalityTraits: {
+      openness: Math.floor(Math.random() * 30) + 60,
+      conscientiousness: Math.floor(Math.random() * 30) + 60,
+      extraversion: Math.floor(Math.random() * 40) + 40,
+      agreeableness: Math.floor(Math.random() * 30) + 60,
+      neuroticism: Math.floor(Math.random() * 30) + 20,
+    },
+  };
+}
+
+module.exports = { generateSessionQuestions, evaluateAnswer, generateSessionSummary };

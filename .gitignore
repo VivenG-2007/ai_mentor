@@ -1,0 +1,8 @@
+node_modules/
+.env
+.env.local
+dist/
+build/
+reports/*.pdf
+*.log
+.DS_Store
