@@ -121,17 +121,17 @@ function AvatarBody({ avatarState }) {
       }
     }
 
-    // Lip-sync jaw
-    if (jawRef.current && mouthRef.current) {
+    // Lip-sync mouth (direct scale animation)
+    if (mouthRef.current) {
       if (avatarState === 'speaking') {
         const open = Math.abs(Math.sin(t * 8.5)) * 0.55 + Math.abs(Math.sin(t * 5.8 + 1)) * 0.45;
-        jawRef.current.position.y = -0.13 - open * 0.045;
         mouthRef.current.scale.y = 0.5 + open * 1.6;
         mouthRef.current.scale.x = 1 + open * 0.2;
+        mouthRef.current.position.y = -0.11 - open * 0.02;
       } else {
-        jawRef.current.position.y = THREE.MathUtils.lerp(jawRef.current.position.y, -0.13, 0.14);
         mouthRef.current.scale.y = THREE.MathUtils.lerp(mouthRef.current.scale.y, 0.5, 0.14);
         mouthRef.current.scale.x = THREE.MathUtils.lerp(mouthRef.current.scale.x, 1, 0.14);
+        mouthRef.current.position.y = THREE.MathUtils.lerp(mouthRef.current.position.y, -0.11, 0.14);
       }
     }
   });
@@ -256,19 +256,11 @@ function AvatarBody({ avatarState }) {
       {/* ── HEAD ─────────────────────────────────────── */}
       <group ref={headRef} position={[0, 1.48, 0]}>
 
-        {/* Skull — slightly oval */}
-        <mesh scale={[1, 1.08, 0.96]}>
-          <sphereGeometry args={[0.29, 32, 32]} />
+        {/* Single Head Sphere */}
+        <mesh scale={[1, 1.05, 0.98]}>
+          <sphereGeometry args={[0.3, 36, 36]} />
           <meshStandardMaterial color={SKIN} roughness={0.6} />
         </mesh>
-
-        {/* Jaw lower half */}
-        <group ref={jawRef} position={[0, -0.13, 0.01]}>
-          <mesh scale={[1.0, 0.72, 1.0]}>
-            <sphereGeometry args={[0.29, 32, 24, 0, Math.PI*2, Math.PI*0.42, Math.PI*0.58]} />
-            <meshStandardMaterial color={SKIN} roughness={0.6} />
-          </mesh>
-        </group>
 
         {/* ── HAIR ──────────────────────────────────── */}
         {/* Top cap */}
@@ -352,7 +344,7 @@ function AvatarBody({ avatarState }) {
           <meshStandardMaterial color="#b86070" roughness={0.5} />
         </mesh>
         {/* Lower lip (animated) */}
-        <group ref={mouthRef} position={[0, -0.124, 0.274]}>
+        <group ref={mouthRef} position={[0, -0.11, 0.285]}>
           <mesh>
             <boxGeometry args={[0.1, 0.02, 0.01]} />
             <meshStandardMaterial color="#b86070" roughness={0.5} />
