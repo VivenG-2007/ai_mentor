@@ -4,16 +4,16 @@ import { Sparkles } from 'lucide-react';
 
 export default function LoadingScreen() {
   return (
-    <div className="fixed inset-0 bg-surface-950 dark:bg-surface-950 light:bg-slate-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-white flex items-center justify-center z-50">
       <div className="text-center">
         <motion.div
           animate={{ scale: [1, 1.1, 1], opacity: [0.7, 1, 0.7] }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-16 h-16 rounded-2xl bg-brand-500/20 border border-brand-500/30 flex items-center justify-center mx-auto mb-4 glow-brand"
+          className="w-16 h-16 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center mx-auto mb-4 glow-brand overflow-hidden"
         >
-          <Sparkles size={28} className="text-brand-400" />
+          <img src="/favicon.png" alt="Loading Logo" className="w-full h-full object-cover" />
         </motion.div>
-        <h2 className="font-display font-bold dark:text-white light:text-slate-900 text-xl mb-2">AI Mentor</h2>
+        <h2 className="font-display font-bold text-slate-900 text-xl mb-2">AI Mentor</h2>
         <div className="flex items-center justify-center gap-1.5">
           {[0, 1, 2].map(i => (
             <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-brand-500"

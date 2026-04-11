@@ -33,8 +33,8 @@ export default function Layout() {
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-8 border-b border-white/5 dark:border-white/5 light:border-slate-200">
-        <div className="w-10 h-10 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center shadow-lg shadow-brand-500/10">
-          <Sparkles size={20} className="text-brand-500" />
+        <div className="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center shadow-lg shadow-brand-500/10 overflow-hidden">
+          <img src="/favicon.png" alt="Logo" className="w-full h-full object-cover" />
         </div>
         <div>
           <h1 className="font-display font-bold text-lg leading-none dark:text-white light:text-slate-900">AI Mentor</h1>
@@ -122,8 +122,8 @@ export default function Layout() {
             <Menu size={20} />
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl premium-gradient flex items-center justify-center shadow-lg">
-              <Sparkles size={16} className="text-white" />
+            <div className="w-8 h-8 rounded-lg premium-gradient flex items-center justify-center shadow-lg overflow-hidden">
+              <img src="/favicon.png" alt="Logo" className="w-full h-full object-cover" />
             </div>
             <span className="font-display font-bold dark:text-white light:text-slate-900 tracking-tight">AI Mentor</span>
           </div>

@@ -46,8 +46,8 @@ export default function Register() {
       >
         {/* Branding */}
         <div className="text-center mb-10">
-          <div className="w-16 h-16 rounded-[2rem] bg-brand-500 flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-brand-500/40">
-            <Sparkles size={32} className="text-white" />
+          <div className="w-16 h-16 rounded-[2rem] bg-brand-500 flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-brand-500/40 overflow-hidden">
+            <img src="/favicon.png" alt="AI Mentor Logo" className="w-full h-full object-cover scale-110" />
           </div>
           <h1 className="text-4xl font-display font-bold dark:text-white light:text-slate-900 tracking-tight">Create Intel ID</h1>
           <p className="text-slate-500 mt-2 font-medium">Join the next generation of mentors</p>
