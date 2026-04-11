@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   User, Mail, Briefcase, Target, Bell, Palette, Lock, Save,
-  CheckCircle2, AlertCircle, Camera, Shield
+  CheckCircle2, AlertCircle, Camera, Shield, Trash2
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -114,6 +114,11 @@ export default function Profile() {
     }
   };
 
+  const handleDeletePhoto = () => {
+    setProfile(p => ({ ...p, avatar: '' }));
+    showToast('Photo removed. Click Save to finalize.');
+  };
+
   return (
     <div className="p-6 lg:p-8 max-w-3xl mx-auto space-y-6">
       {toast && <Toast message={toast.message} type={toast.type} />}
@@ -149,17 +154,23 @@ export default function Profile() {
             accept="image/*" onChange={handleFileChange} 
           />
         </div>
-        <div>
+        <div className="flex-1">
           <h2 className="font-display font-bold text-white text-lg">{user?.name}</h2>
           <p className="text-slate-400 text-sm">{user?.email}</p>
-          <div className="flex items-center gap-3 mt-2">
+          <div className="flex flex-wrap items-center gap-3 mt-3">
             <span className="score-badge bg-brand-500/10 text-brand-400 border border-brand-500/20">
               <Shield size={10} />
               {user?.role === 'admin' ? 'Admin' : 'Learner'}
             </span>
-            <span className="text-xs text-slate-500">
-              {user?.totalSessions || 0} sessions · {user?.averageScore || 0}% avg
-            </span>
+            {profile.avatar && (
+              <button 
+                onClick={handleDeletePhoto}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-bold uppercase tracking-wider hover:bg-red-500/20 transition-all"
+              >
+                <Trash2 size={12} />
+                Delete Photo
+              </button>
+            )}
           </div>
         </div>
       </motion.div>
