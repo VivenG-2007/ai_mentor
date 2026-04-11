@@ -15,6 +15,15 @@ const STATUS_CONFIG = {
   cancelled: { label: 'Cancelled', color: 'dark:text-red-400 light:text-red-600 dark:bg-red-500/10 light:bg-red-600/5 border-red-500/20', icon: XCircle },
 };
 
+// Calculate backend base URL (remove /api from the end if present)
+const BACKEND_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api$/, '');
+
+function getReportUrl(path) {
+  if (!path) return '#';
+  if (path.startsWith('http')) return path;
+  return `${BACKEND_URL}${path}`;
+}
+
 function ScoreBar({ score, color = '#6366f1' }) {
   return (
     <div className="flex items-center gap-2">
@@ -157,7 +166,7 @@ function SessionDetailModal({ session, onClose }) {
         {/* Footer */}
         {session.report?.pdfPath && (
           <div className="p-4 border-t border-white/5">
-            <a href={session.report.pdfPath} target="_blank" rel="noopener noreferrer"
+            <a href={getReportUrl(session.report.pdfPath)} target="_blank" rel="noopener noreferrer"
               className="w-full btn-primary flex items-center justify-center gap-2 text-sm">
               <Download size={15} />
               Download PDF Report
@@ -322,7 +331,7 @@ export default function History() {
                       <Eye size={15} />
                     </button>
                     {session.report?.pdfPath && (
-                      <a href={session.report.pdfPath} target="_blank" rel="noopener noreferrer"
+                      <a href={getReportUrl(session.report.pdfPath)} target="_blank" rel="noopener noreferrer"
                         className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-white/5 text-slate-400 hover:text-brand-400 transition-all">
                         <Download size={15} />
                       </a>

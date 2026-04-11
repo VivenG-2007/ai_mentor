@@ -31,6 +31,8 @@ const TYPE_CONFIG = {
   },
 };
 
+const BACKEND_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api$/, '');
+
 function ScoreDisplay({ score, feedback, strengths, improvements, onNext, isLast }) {
   const color = score >= 80 ? 'text-green-400' : score >= 60 ? 'text-amber-400' : 'text-red-400';
   return (
@@ -474,7 +476,7 @@ export default function Session() {
               </div>
 
               {report?.pdfPath && (
-                <a href={report.pdfPath} target="_blank" rel="noopener noreferrer"
+                <a href={`${BACKEND_URL}${report.pdfPath}`} target="_blank" rel="noopener noreferrer"
                   className="w-full btn-primary flex items-center justify-center gap-2">
                   <Download size={16} />
                   Download Performance Report
