@@ -127,19 +127,23 @@ export default function Profile() {
       {/* Avatar */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
         className="card flex items-center gap-5">
-        <div className="relative">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white font-display font-bold text-3xl overflow-hidden shadow-2xl">
-            {user?.avatar ? (
-              <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+        <div 
+          className="relative cursor-pointer group"
+          onClick={() => document.getElementById('avatar-upload').click()}
+        >
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white font-display font-bold text-3xl overflow-hidden shadow-2xl transition-transform group-hover:scale-105">
+            {profile.avatar ? (
+              <img src={profile.avatar} alt={user?.name} className="w-full h-full object-cover" />
             ) : (
               user?.name?.[0]?.toUpperCase() || 'U'
             )}
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <Camera size={24} className="text-white" />
+            </div>
           </div>
-          <button 
-            onClick={() => document.getElementById('avatar-upload').click()}
-            className="absolute -bottom-1 -right-1 w-7 h-7 rounded-lg bg-surface-800 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+          <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-lg bg-surface-800 border border-white/10 flex items-center justify-center text-slate-400">
             <Camera size={12} />
-          </button>
+          </div>
           <input 
             type="file" id="avatar-upload" className="hidden" 
             accept="image/*" onChange={handleFileChange} 
