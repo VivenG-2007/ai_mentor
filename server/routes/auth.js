@@ -68,7 +68,7 @@ router.post('/login', [
     
     if (!user) {
       console.log(`❌ Login failed: User not found (${email})`);
-      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+      return res.status(401).json({ success: false, message: "User doesn't exist, register first" });
     }
 
     const isMatch = await user.comparePassword(password);
