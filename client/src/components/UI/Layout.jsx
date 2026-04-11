@@ -116,6 +116,8 @@ export default function Layout() {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        <div className="bg-mesh-animated" />
+        
         {/* Mobile header */}
         <header className="lg:hidden flex items-center justify-between px-5 py-4 dark:bg-surface-950/80 light:bg-white/80 backdrop-blur-xl border-b dark:border-white/5 light:border-slate-200 z-20">
           <button onClick={() => setSidebarOpen(true)} className="p-2.5 rounded-xl dark:bg-white/5 light:bg-slate-100 dark:text-slate-300 light:text-slate-600">
@@ -134,9 +136,18 @@ export default function Layout() {
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto scroll-smooth">
-          <div className="h-full relative px-4 py-6 md:p-8 lg:p-10">
-            <Outlet />
-          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={window.location.pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="h-full relative px-4 py-6 md:p-8 lg:p-10"
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
         </main>
 
         {/* AI Assistant Floating Component */}

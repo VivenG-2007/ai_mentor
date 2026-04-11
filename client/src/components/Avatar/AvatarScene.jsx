@@ -125,11 +125,11 @@ function AvatarBody({ avatarState }) {
     if (jawRef.current && mouthRef.current) {
       if (avatarState === 'speaking') {
         const open = Math.abs(Math.sin(t * 8.5)) * 0.55 + Math.abs(Math.sin(t * 5.8 + 1)) * 0.45;
-        jawRef.current.position.y = -0.145 - open * 0.045;
+        jawRef.current.position.y = -0.16 - open * 0.045;
         mouthRef.current.scale.y = 0.5 + open * 1.6;
         mouthRef.current.scale.x = 1 + open * 0.2;
       } else {
-        jawRef.current.position.y = THREE.MathUtils.lerp(jawRef.current.position.y, -0.145, 0.14);
+        jawRef.current.position.y = THREE.MathUtils.lerp(jawRef.current.position.y, -0.16, 0.14);
         mouthRef.current.scale.y = THREE.MathUtils.lerp(mouthRef.current.scale.y, 0.5, 0.14);
         mouthRef.current.scale.x = THREE.MathUtils.lerp(mouthRef.current.scale.x, 1, 0.14);
       }
@@ -167,13 +167,13 @@ function AvatarBody({ avatarState }) {
           <meshStandardMaterial color={SHIRT} roughness={0.55} />
         </RoundedBox>
         {/* Shoulder rounding L */}
-        <mesh position={[-0.3, 0.28, 0]}>
-          <sphereGeometry args={[0.13, 14, 14]} />
+        <mesh position={[-0.38, 0.28, 0]}>
+          <sphereGeometry args={[0.13, 16, 16]} />
           <meshStandardMaterial color={SHIRT} roughness={0.55} />
         </mesh>
         {/* Shoulder rounding R */}
-        <mesh position={[0.3, 0.28, 0]}>
-          <sphereGeometry args={[0.13, 14, 14]} />
+        <mesh position={[0.38, 0.28, 0]}>
+          <sphereGeometry args={[0.13, 16, 16]} />
           <meshStandardMaterial color={SHIRT} roughness={0.55} />
         </mesh>
         {/* Shirt collar */}
@@ -184,7 +184,7 @@ function AvatarBody({ avatarState }) {
       </group>
 
       {/* ── LEFT ARM ─────────────────────────────────── */}
-      <group ref={lShoulderRef} position={[-0.55, 1.02, 0]} rotation={[0, 0, -0.22]}>
+      <group ref={lShoulderRef} position={[-0.45, 1.0, 0]} rotation={[0, 0, -0.22]}>
         {/* Upper arm */}
         <mesh position={[0, -0.15, 0]}>
           <capsuleGeometry args={[0.085, 0.25, 8, 14]} />
@@ -216,7 +216,7 @@ function AvatarBody({ avatarState }) {
       </group>
 
       {/* ── RIGHT ARM ────────────────────────────────── */}
-      <group ref={rShoulderRef} position={[0.55, 1.02, 0]} rotation={[0, 0, 0.22]}>
+      <group ref={rShoulderRef} position={[0.45, 1.0, 0]} rotation={[0, 0, 0.22]}>
         {/* Upper arm */}
         <mesh position={[0, -0.15, 0]}>
           <capsuleGeometry args={[0.085, 0.25, 8, 14]} />
@@ -263,9 +263,9 @@ function AvatarBody({ avatarState }) {
         </mesh>
 
         {/* Jaw lower half */}
-        <group ref={jawRef} position={[0, -0.145, 0]}>
-          <mesh scale={[1, 0.55, 0.95]}>
-            <sphereGeometry args={[0.26, 24, 16, 0, Math.PI*2, Math.PI*0.35, Math.PI*0.65]} />
+        <group ref={jawRef} position={[0, -0.16, 0.015]}>
+          <mesh scale={[1.05, 0.65, 1.0]}>
+            <sphereGeometry args={[0.26, 32, 20, 0, Math.PI*2, Math.PI*0.4, Math.PI*0.6]} />
             <meshStandardMaterial color={SKIN} roughness={0.65} />
           </mesh>
         </group>
