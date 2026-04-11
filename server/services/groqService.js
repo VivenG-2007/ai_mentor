@@ -71,8 +71,12 @@ Tone: Professional, technically grounded, and growth-oriented. Return ONLY a val
   const content = await chatCompletion([{ role: 'user', content: prompt }], 2048);
   
   try {
-    const cleaned = content.replace(/```json\n?|\n?```/g, '').trim();
-    let parsed = JSON.parse(cleaned);
+    const startIdx = content.indexOf('[');
+    const endIdx = content.lastIndexOf(']');
+    if (startIdx === -1 || endIdx === -1) return getMockQuestions(questionCount);
+    
+    const jsonStr = content.substring(startIdx, endIdx + 1);
+    let parsed = JSON.parse(jsonStr);
     
     if (!Array.isArray(parsed)) return getMockQuestions(questionCount);
 
@@ -127,7 +131,7 @@ Question Type: ${questionType}
 Question: ${question}
 User's Answer: ${answer}
 
-Return this exact JSON structure:
+Return ONLY a valid JSON object. Do not include any markdown, triple backticks, or extra text.
 {
   "score": <0-100>,
   "feedback": "<specific feedback>",
@@ -143,13 +147,18 @@ Return this exact JSON structure:
     "agreeableness": <0-100>,
     "neuroticism": <0-100>
   }
-}`;
+} (Ensure all strings are properly escaped)`;
 
   const content = await chatCompletion([{ role: 'user', content: prompt }]);
   
   try {
-    const cleaned = content.replace(/```json\n?|\n?```/g, '').trim();
-    const result = JSON.parse(cleaned);
+    // Robust JSON extraction: Find the first '{' and the last '}'
+    const startIdx = content.indexOf('{');
+    const endIdx = content.lastIndexOf('}');
+    if (startIdx === -1 || endIdx === -1) throw new Error('No JSON object found');
+    
+    const jsonStr = content.substring(startIdx, endIdx + 1);
+    const result = JSON.parse(jsonStr);
     
     // Ensure personalityTraits exist
     const sensitivePattern = /vulgar|offensive|sexual|explicit|violent|hate|racist|death|kill/i;
@@ -218,8 +227,12 @@ Return ONLY valid JSON (no markdown), with this structure:
   const content = await chatCompletion([{ role: 'user', content: prompt }]);
   
   try {
-    const cleaned = content.replace(/```json\n?|\n?```/g, '').trim();
-    return JSON.parse(cleaned);
+    const startIdx = content.indexOf('{');
+    const endIdx = content.lastIndexOf('}');
+    if (startIdx === -1 || endIdx === -1) throw new Error('No JSON object found');
+    
+    const jsonStr = content.substring(startIdx, endIdx + 1);
+    return JSON.parse(jsonStr);
   } catch {
     return {
       overallFeedback: 'You demonstrated strong engagement throughout the session.',
