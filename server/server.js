@@ -47,7 +47,10 @@ app.use(helmet({
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    const isVercel = origin && origin.endsWith('.vercel.app');
+    const isLocal = origin && (origin.includes('localhost') || origin.includes('127.0.0.1'));
+    
+    if (!origin || allowedOrigins.includes(origin) || isVercel || isLocal) {
       callback(null, true);
     } else {
       logger.error(`CORS blocked for origin: ${origin}`);
