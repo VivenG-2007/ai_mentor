@@ -125,11 +125,11 @@ function AvatarBody({ avatarState }) {
     if (jawRef.current && mouthRef.current) {
       if (avatarState === 'speaking') {
         const open = Math.abs(Math.sin(t * 8.5)) * 0.55 + Math.abs(Math.sin(t * 5.8 + 1)) * 0.45;
-        jawRef.current.position.y = -0.16 - open * 0.045;
+        jawRef.current.position.y = -0.13 - open * 0.045;
         mouthRef.current.scale.y = 0.5 + open * 1.6;
         mouthRef.current.scale.x = 1 + open * 0.2;
       } else {
-        jawRef.current.position.y = THREE.MathUtils.lerp(jawRef.current.position.y, -0.16, 0.14);
+        jawRef.current.position.y = THREE.MathUtils.lerp(jawRef.current.position.y, -0.13, 0.14);
         mouthRef.current.scale.y = THREE.MathUtils.lerp(mouthRef.current.scale.y, 0.5, 0.14);
         mouthRef.current.scale.x = THREE.MathUtils.lerp(mouthRef.current.scale.x, 1, 0.14);
       }
@@ -263,10 +263,10 @@ function AvatarBody({ avatarState }) {
         </mesh>
 
         {/* Jaw lower half */}
-        <group ref={jawRef} position={[0, -0.16, 0.015]}>
-          <mesh scale={[1.05, 0.65, 1.0]}>
-            <sphereGeometry args={[0.26, 32, 20, 0, Math.PI*2, Math.PI*0.4, Math.PI*0.6]} />
-            <meshStandardMaterial color={SKIN} roughness={0.65} />
+        <group ref={jawRef} position={[0, -0.13, 0.01]}>
+          <mesh scale={[1.0, 0.72, 1.0]}>
+            <sphereGeometry args={[0.29, 32, 24, 0, Math.PI*2, Math.PI*0.42, Math.PI*0.58]} />
+            <meshStandardMaterial color={SKIN} roughness={0.6} />
           </mesh>
         </group>
 
