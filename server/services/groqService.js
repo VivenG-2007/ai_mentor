@@ -171,7 +171,8 @@ Return ONLY a valid JSON object. Do not include any markdown, triple backticks, 
     "extraversion": <0-100>,
     "agreeableness": <0-100>,
     "neuroticism": <0-100>
-  }
+  },
+  "studentGrowthTip": "<One specific soft-skill or career tip tailored for a student in their specific year>"
 } (Ensure all strings are properly escaped)`;
 
   const content = await chatCompletion([{ role: 'user', content: prompt }]);

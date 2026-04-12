@@ -12,7 +12,7 @@ class AIEngineService {
    */
   async generateAdaptiveQuestions(userId, sessionOptions = {}) {
     const user = await User.findById(userId);
-    const { mode = 'practice', difficulty = 3, careerTrack = user.careerTrack || 'SDE' } = sessionOptions;
+    const { mode = 'practice', difficulty = 3, careerTrack = user.careerTrack || 'SDE', questionCount = 6 } = sessionOptions;
 
     // 1. Fetch long-term memory & context
     const context = await memoryService.getRelevantContext(userId, "Identify common patterns in past sessions", 10);
@@ -20,23 +20,27 @@ class AIEngineService {
 
     // 2. Prepare specialized instructions for the LLM
     const specializedPrompt = `
-      You are the ${user.mentorPreference?.tone || 'professional'} Mentor for a ${careerTrack} professional.
+      You are a specialized Mentor for a ${user.collegeYear}-year B.Tech Student.
       
+      STUDENT ACADEMIC YEAR: Year ${user.collegeYear} (B.Tech)
       CAREER TRACK: ${careerTrack}
       CURRENT LEVEL: ${user.level}
-      SESSION MODE: ${mode} (Pressure: ${mode === 'pressure' ? 'High - ask aggressive follow-ups' : 'Standard'})
+      SESSION MODE: ${mode}
       DIFFICULTY TARGET: ${difficulty}/10
+      
+      YEAR-SPECIFIC FOCUS:
+      - Year 1: Fundamentals, logic, growth mindset, adjusting to engineering.
+      - Year 2: Data structures, core engineering, collaborative coding.
+      - Year 3: Practical projects, specialized tech, internship preparation.
+      - Year 4: Advanced architecture, placement readiness, professional ethics.
       
       USER CONTEXT FROM MEMORY:
       ${context || 'New user, no history.'}
       
-      WEAK AREAS TO ADDRESS:
-      ${weakAreas.length > 0 ? weakAreas.join(', ') : 'None identified yet.'}
-      
       INSTRUCTIONS:
-      - Reference past sessions/answers if possible to make the user feel heard.
-      - If in 'pressure' mode, simulate an intense interview atmosphere.
-      - Align difficulty precisely with level ${user.level}.
+      - REFERENCE past sessions if possible.
+      - MANDATORY: Include at least ONE question focused specifically on Personality Development (soft skills, leadership, or mental resilience).
+      - Ensure technical questions are strictly appropriate for a Year ${user.collegeYear} student.
     `;
 
     // 3. Delegate to Groq with enriched context
@@ -44,7 +48,7 @@ class AIEngineService {
       ...user.toObject(),
       instructions: specializedPrompt,
       sessionMode: mode
-    }, 6); // Flagship sessions are more focused (6 high-quality questions)
+    }, questionCount);
 
     return questions;
   }

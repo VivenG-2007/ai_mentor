@@ -89,6 +89,7 @@ const answerSchema = new mongoose.Schema({
     agreeableness: Number,
     neuroticism: Number,
   },
+  studentGrowthTip: { type: String, default: '' },
   isEvaluated: { type: Boolean, default: false },
   evaluatedAt: { type: Date },
 }, {

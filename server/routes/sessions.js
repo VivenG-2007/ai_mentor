@@ -93,7 +93,8 @@ sessionsRouter.post('/start', protect, async (req, res) => {
     const questionsData = await aiEngine.generateAdaptiveQuestions(req.user._id, { 
       mode, 
       difficulty, 
-      careerTrack 
+      careerTrack,
+      questionCount
     });
     
     const questions = await Question.insertMany(
@@ -150,13 +151,27 @@ sessionsRouter.put('/:id/complete', protect, async (req, res) => {
       { new: true }
     );
     
-    // Update user stats
+    // Update user stats with XP and Leveling
     const allSessions = await Session.find({ user: req.user._id, status: 'completed' });
     const avgScore = allSessions.reduce((sum, s) => sum + (s.scores?.overall || 0), 0) / allSessions.length;
     
+    // XP Calculation: Base 100 + (score * 4) -> Max 500 per session
+    const gainedXp = 100 + Math.round((scores?.overall || 0) * 4);
+    let newXp = (req.user.xp || 0) + gainedXp;
+    let newLevel = req.user.level || 1;
+    
+    // Level up logic (1000 XP per level)
+    while (newXp >= newLevel * 1000) {
+      newXp -= newLevel * 1000;
+      newLevel++;
+    }
+
     await require('../models/User').findByIdAndUpdate(req.user._id, {
       totalSessions: allSessions.length,
       averageScore: Math.round(avgScore),
+      xp: newXp,
+      level: newLevel,
+      lastActive: new Date()
     });
     
     if (req.io) req.io.to(`user:${req.user._id}`).emit('session:completed', { sessionId: session._id });

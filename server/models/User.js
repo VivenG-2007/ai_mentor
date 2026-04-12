@@ -68,6 +68,12 @@ const userSchema = new mongoose.Schema({
   averageScore: { type: Number, default: 0 },
   lastActive: { type: Date, default: Date.now },
   isActive: { type: Boolean, default: true },
+  collegeYear: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    default: 1,
+  },
+  personalityFocus: [String],
 }, {
   timestamps: true,
 });

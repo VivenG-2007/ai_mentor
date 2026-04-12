@@ -9,6 +9,13 @@ const cron = require('node-cron');
 const path = require('path');
 const helmet = require('helmet');
 const logger = require('./services/logger');
+const fs = require('fs');
+
+// Ensure reports directory exists for static serving
+const reportsDir = path.resolve(__dirname, 'reports');
+if (!fs.existsSync(reportsDir)) {
+  fs.mkdirSync(reportsDir, { recursive: true });
+}
 
 // Validation: Critical check for production environment
 if (process.env.NODE_ENV === 'production') {
@@ -79,7 +86,21 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use('/api/', limiter);
-app.use('/reports', express.static(path.join(__dirname, 'reports')));
+app.use('/reports', cors(corsOptions), express.static(path.resolve(__dirname, 'reports'), {
+  setHeaders: (res) => {
+    res.set('Content-Type', 'application/pdf');
+    res.set('Content-Disposition', 'inline');
+  }
+}));
+
+// Debugging route to help user find missing PDFs
+app.get('/api/debug-reports', protect, async (req, res) => {
+  const fs = require('fs');
+  const reportsDir = path.resolve(__dirname, 'reports');
+  if (!fs.existsSync(reportsDir)) return res.json({ error: 'Directory missing', path: reportsDir });
+  const files = fs.readdirSync(reportsDir);
+  res.json({ reportsDir, files });
+});
 app.use((req, res, next) => { req.io = io; next(); });
 
 app.use('/api/auth', authRoutes);

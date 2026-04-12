@@ -42,6 +42,7 @@ export default function Profile() {
   const [profile, setProfile] = useState({
     name: user?.name || '',
     profession: user?.profession || '',
+    collegeYear: user?.collegeYear || 1,
     goals: (user?.goals || []).join(', '),
     avatar: user?.avatar || '',
     theme: user?.theme || 'dark',
@@ -63,6 +64,7 @@ export default function Profile() {
       const updates = {
         name: profile.name,
         profession: profile.profession,
+        collegeYear: profile.collegeYear,
         goals: profile.goals.split(',').map(g => g.trim()).filter(Boolean),
         avatar: profile.avatar,
         theme: profile.theme,
@@ -193,12 +195,24 @@ export default function Profile() {
               <input value={user?.email} disabled
                 className="input-field opacity-50 cursor-not-allowed" />
             </div>
-            <div className="sm:col-span-2">
+            <div className="sm:col-span-1">
+              <label className="label mb-1.5 block">
+                <span className="flex items-center gap-1.5"><Shield size={12} />College Year (B.Tech)</span>
+              </label>
+              <select value={profile.collegeYear} onChange={e => setProfile(p => ({ ...p, collegeYear: Number(e.target.value) }))}
+                className="input-field">
+                <option value={1}>1st Year (Fundamentals)</option>
+                <option value={2}>2nd Year (Core Eng)</option>
+                <option value={3}>3rd Year (Intern Prep)</option>
+                <option value={4}>4th Year (Placements)</option>
+              </select>
+            </div>
+            <div className="sm:col-span-1">
               <label className="label mb-1.5 block">
                 <span className="flex items-center gap-1.5"><Briefcase size={12} />Profession</span>
               </label>
               <input value={profile.profession} onChange={e => setProfile(p => ({ ...p, profession: e.target.value }))}
-                className="input-field" placeholder="e.g. Software Engineer, Student, Manager" />
+                className="input-field" placeholder="e.g. SDE, Student" />
             </div>
             <div className="sm:col-span-2">
               <label className="label mb-1.5 block">

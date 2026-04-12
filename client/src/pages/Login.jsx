@@ -34,8 +34,9 @@ export default function Login() {
       
       {/* Theme Toggle Button */}
       <button onClick={toggleTheme} 
+        aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
         className="fixed top-6 right-6 p-3 rounded-2xl glass hover:scale-110 transition-all duration-300 z-50">
-        {theme === 'dark' ? <Sun size={20} className="text-amber-400" /> : <Moon size={20} className="text-indigo-600" />}
+        {theme === 'dark' ? <Sun size={20} className="text-amber-400" aria-hidden="true" /> : <Moon size={20} className="text-indigo-600" aria-hidden="true" />}
       </button>
 
       <motion.div
@@ -45,13 +46,13 @@ export default function Login() {
         className="w-full max-w-md relative z-10"
       >
         {/* Branding */}
-        <div className="text-center mb-10">
+        <header className="text-center mb-10">
           <div className="w-16 h-16 rounded-[2rem] bg-brand-500 flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-brand-500/40 overflow-hidden">
-            <img src="/favicon.png" alt="AI Mentor Logo" className="w-full h-full object-cover scale-110" />
+            <img src="/favicon.png" alt="AI Mentor Logo" width="64" height="64" className="w-full h-full object-cover scale-110" />
           </div>
           <h1 className="text-4xl font-display font-bold dark:text-white light:text-slate-900 tracking-tight">Access Intel</h1>
           <p className="text-slate-500 mt-2 font-medium">Welcome back to your neural mentor</p>
-        </div>
+        </header>
 
         <div className="glass-card">
           {error && (
@@ -76,8 +77,9 @@ export default function Login() {
                   onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
                   placeholder="••••••••" required className="input-premium pr-12" />
                 <button type="button" onClick={() => setShowPw(!showPw)}
+                  aria-label={showPw ? "Hide password" : "Show password"}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-brand-500 transition-colors">
-                  {showPw ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showPw ? <EyeOff size={20} aria-hidden="true" /> : <Eye size={20} aria-hidden="true" />}
                 </button>
               </div>
             </div>

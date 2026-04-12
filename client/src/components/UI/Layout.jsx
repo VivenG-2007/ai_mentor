@@ -119,18 +119,25 @@ export default function Layout() {
         <div className="bg-mesh-animated" />
         
         {/* Mobile header */}
-        <header className="lg:hidden flex items-center justify-between px-5 py-4 dark:bg-surface-950/80 light:bg-white/80 backdrop-blur-xl border-b dark:border-white/5 light:border-slate-200 z-20">
-          <button onClick={() => setSidebarOpen(true)} className="p-2.5 rounded-xl dark:bg-white/5 light:bg-slate-100 dark:text-slate-300 light:text-slate-600">
-            <Menu size={20} />
+        <header className="lg:hidden flex items-center justify-between px-5 py-4 dark:bg-surface-950/80 light:bg-white/80 backdrop-blur-xl border-b dark:border-white/5 light:border-slate-200 z-20" role="banner">
+          <button 
+            onClick={() => setSidebarOpen(true)} 
+            aria-label="Open Navigation Menu"
+            className="p-2.5 rounded-xl dark:bg-white/5 light:bg-slate-100 dark:text-slate-300 light:text-slate-600"
+          >
+            <Menu size={20} aria-hidden="true" />
           </button>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg premium-gradient flex items-center justify-center shadow-lg overflow-hidden">
-              <img src="/favicon.png" alt="Logo" className="w-full h-full object-cover" />
+              <img src="/favicon.png" alt="AI Mentor Logo" width="32" height="32" className="w-full h-full object-cover" />
             </div>
             <span className="font-display font-bold dark:text-white light:text-slate-900 tracking-tight">AI Mentor</span>
           </div>
-          <button className="p-2.5 rounded-xl dark:bg-white/5 light:bg-slate-100 dark:text-slate-300 light:text-slate-600">
-            <Bell size={20} />
+          <button 
+            aria-label="View notifications"
+            className="p-2.5 rounded-xl dark:bg-white/5 light:bg-slate-100 dark:text-slate-300 light:text-slate-600"
+          >
+            <Bell size={20} aria-hidden="true" />
           </button>
         </header>
 

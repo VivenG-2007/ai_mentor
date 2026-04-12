@@ -22,13 +22,13 @@ const fadeIn = (delay = 0) => ({
 });
 
 function XpBar({ xp, level }) {
-  const nextLevelXp = (level + 1) * 1000;
-  const progress = (xp / nextLevelXp) * 100;
+  const targetXp = level * 1000;
+  const progress = (xp / targetXp) * 100;
   return (
     <div className="flex flex-col gap-1 w-full max-w-[200px]">
       <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-slate-500">
         <span>Level {level}</span>
-        <span>{xp} / {nextLevelXp} XP</span>
+        <span>{Math.round(xp)} / {targetXp} XP</span>
       </div>
       <div className="h-1.5 w-full bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
         <motion.div 
@@ -169,11 +169,12 @@ export default function Dashboard() {
       </section>
 
       {/* Grid: 2 columns on mobile, 4 on desktop */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      {/* Grid: 1 column on mobile, 2 on tablet, 4 on desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6" role="list" aria-label="Key Performance Indicators">
         <StatCard icon={Target} label="Sessions" value={data?.stats?.totalSessions || 0} />
         <StatCard icon={TrendingUp} label="Avg Score" value={`${data?.stats?.averageScore || 0}%`} trend={3.2} />
         <StatCard icon={Flame} label="Streak" value={`${data?.stats?.currentStreak || 0}`} sub="Current Week" />
-        <StatCard icon={Trophy} label="Rank" value={`#42`} sub="Global Leaderboard" />
+        <StatCard icon={Trophy} label="Rank" value={`#${data?.rank || '-'}`} sub="Global Leaderboard" />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6 md:gap-8">

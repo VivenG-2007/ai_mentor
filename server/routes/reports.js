@@ -149,15 +149,43 @@ router.get('/', protect, async (req, res) => {
   }
 });
 
-// Get single report
-router.get('/:id', protect, async (req, res) => {
+// View/Stream PDF (Self-healing: regenerates if missing from ephemeral disk)
+router.get('/view/:id', protect, async (req, res) => {
   try {
     const report = await Report.findOne({ _id: req.params.id, user: req.user._id })
       .populate('session');
+    
     if (!report) return res.status(404).json({ success: false, message: 'Report not found' });
-    res.json({ success: true, report });
+    
+    const fs = require('fs');
+    const path = require('path');
+    const reportsDir = path.resolve(__dirname, '../reports');
+    const filename = report.pdfPath?.split('/').pop();
+    const filepath = filename ? path.join(reportsDir, filename) : null;
+    
+    // If file exists, stream it
+    if (filepath && fs.existsSync(filepath)) {
+      return res.contentType('application/pdf').sendFile(filepath);
+    }
+    
+    // SELF-HEALING: Regenerate if missing
+    console.log(`[Self-Healing] Regenerating missing PDF for report: ${report._id}`);
+    const answers = await Answer.find({ session: report.session._id });
+    const questions = await Question.find({ session: report.session._id });
+    
+    const { filepath: newPath } = await generatePDFReport({
+      user: req.user,
+      session: report.session,
+      report,
+      answers,
+      questions,
+    });
+    
+    const absoluteNewPath = path.resolve(__dirname, '..', newPath.substring(1));
+    res.contentType('application/pdf').sendFile(absoluteNewPath);
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error('PDF View error:', error);
+    res.status(500).json({ success: false, message: 'Failed to retrieve or regenerate report' });
   }
 });
 

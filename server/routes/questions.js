@@ -64,6 +64,7 @@ answersRouter.post('/', protect, async (req, res) => {
       clarityScore: advancedMetrics.clarity,
       consistencyScore: advancedMetrics.consistency,
       traitScores: evaluation.personalityTraits,
+      studentGrowthTip: evaluation.studentGrowthTip,
       isEvaluated: true,
       evaluatedAt: new Date(),
     });

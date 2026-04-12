@@ -475,8 +475,8 @@ export default function Session() {
                 </div>
               </div>
 
-              {report?.pdfPath && (
-                <a href={`${BACKEND_URL}${report.pdfPath}`} target="_blank" rel="noopener noreferrer"
+              {report?._id && (
+                <a href={`${BACKEND_URL}/reports/view/${report._id}`} target="_blank" rel="noopener noreferrer"
                   className="w-full btn-primary flex items-center justify-center gap-2">
                   <Download size={16} />
                   Download Performance Report
