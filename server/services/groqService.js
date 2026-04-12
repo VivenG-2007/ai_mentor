@@ -145,9 +145,6 @@ Tone: Professional, technically grounded, and growth-oriented. Return ONLY a val
         difficulty: ['easy', 'medium', 'hard'].includes(q.difficulty?.toLowerCase()) ? q.difficulty.toLowerCase() : 'medium',
       };
     });
-  } catch {
-    return getMockQuestions(questionCount);
-  }
 }
 
 
@@ -204,10 +201,6 @@ Return ONLY a valid JSON object. Do not include any markdown, triple backticks, 
     }
     
     return result;
-  } catch (error) {
-    console.error('Answer evaluation parse error:', error.message);
-    return getMockEvaluation();
-  }
 }
 
 // Generate session summary
