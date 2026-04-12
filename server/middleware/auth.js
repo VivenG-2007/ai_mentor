@@ -20,6 +20,10 @@ const protect = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'User not found or inactive' });
     }
     
+    // Update activity
+    user.lastActive = new Date();
+    await user.save({ validateBeforeSave: false });
+
     req.user = user;
     next();
   } catch (error) {

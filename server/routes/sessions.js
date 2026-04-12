@@ -10,9 +10,20 @@ const { getWeekNumber } = require('../services/scheduler');
 // Get all sessions for user
 sessionsRouter.get('/', protect, async (req, res) => {
   try {
-    const { page = 1, limit = 10, status } = req.query;
+    const { page = 1, limit = 10, status, search } = req.query;
     const filter = { user: req.user._id };
     if (status) filter.status = status;
+    
+    if (search) {
+      const searchNum = parseInt(search);
+      filter.$or = [
+        { status: { $regex: search, $options: 'i' } },
+        { careerTrack: { $regex: search, $options: 'i' } }
+      ];
+      if (!isNaN(searchNum)) {
+        filter.$or.push({ weekNumber: searchNum }, { year: searchNum });
+      }
+    }
     
     const sessions = await Session.find(filter)
       .sort({ createdAt: -1 })
@@ -49,28 +60,49 @@ sessionsRouter.post('/start', protect, async (req, res) => {
     const now = new Date();
     const weekNumber = getWeekNumber(now);
     const year = now.getFullYear();
-    const questionCount = Math.min(15, Math.max(3, parseInt(req.body.questionCount) || 9));
+    const questionCount = Math.min(10, Math.max(2, parseInt(req.body.questionCount) || 3));
+    const mode = req.body.mode || 'practice';
+    const careerTrack = req.body.careerTrack || req.user.careerTrack || 'General';
+    const difficulty = parseInt(req.body.difficulty) || 3;
     
-    // Always create a fresh session so questions are new every time
-    let session = await Session.findOne({ user: req.user._id, weekNumber, year, status: 'in-progress' });
-    
-    if (!session) {
-      session = await Session.create({ user: req.user._id, weekNumber, year, status: 'in-progress', startTime: now });
+    // Check for existing active session
+    let session = await Session.findOne({ 
+      user: req.user._id, 
+      status: 'in-progress' 
+    });
+
+    if (session) {
+      const questions = await Question.find({ session: session._id }).sort({ order: 1 });
+      return res.json({ success: true, session, questions, resumed: true });
     }
+
+    // Create fresh session if none active
+    session = await Session.create({ 
+      user: req.user._id, 
+      weekNumber, 
+      year, 
+      status: 'in-progress', 
+      startTime: now,
+      mode,
+      difficultyLevel: difficulty
+    });
     
-    // Always generate fresh questions — wipe old questions AND answers so counts are clean
-    await Question.deleteMany({ session: session._id });
-    await Answer.deleteMany({ session: session._id });
-    session.answers = [];
+    const uiInstructions = `Mode: ${mode}, Career Track: ${careerTrack}`;
     
-    const questionsData = await generateSessionQuestions({
-      name: req.user.name,
-      profession: req.user.profession,
-      goals: req.user.goals,
-    }, questionCount);
+    const aiEngine = require('../services/aiEngineService');
+    const questionsData = await aiEngine.generateAdaptiveQuestions(req.user._id, { 
+      mode, 
+      difficulty, 
+      careerTrack 
+    });
     
     const questions = await Question.insertMany(
-      questionsData.map((q, i) => ({ ...q, order: i + 1, session: session._id, user: req.user._id }))
+      questionsData.map((q, i) => ({ 
+        ...q, 
+        order: i + 1, 
+        session: session._id, 
+        user: req.user._id 
+      }))
     );
     
     session.questions = questions.map(q => q._id);

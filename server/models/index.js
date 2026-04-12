@@ -79,6 +79,9 @@ const answerSchema = new mongoose.Schema({
   grammarScore: { type: Number },
   vocabularyScore: { type: Number },
   coherenceScore: { type: Number },
+  confidenceScore: { type: Number },
+  clarityScore: { type: Number },
+  consistencyScore: { type: Number },
   traitScores: {
     openness: Number,
     conscientiousness: Number,
@@ -116,6 +119,9 @@ const reportSchema = new mongoose.Schema({
     subjective: { type: Number, default: 0 },
     english: { type: Number, default: 0 },
     psychometric: { type: Number, default: 0 },
+    confidence: { type: Number, default: 0 },
+    clarity: { type: Number, default: 0 },
+    consistency: { type: Number, default: 0 },
   },
   
   personalityTraits: {

@@ -12,12 +12,34 @@ import api from '../services/api';
 import { MiniSparkline } from '../components/Charts';
 import { PulseLoader } from '../components/UI/LoadingScreen';
 
+import Copilot from '../components/UI/Copilot';
+
 const fadeIn = (delay = 0) => ({
   initial: { opacity: 0, y: 30 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true },
   transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] },
 });
+
+function XpBar({ xp, level }) {
+  const nextLevelXp = (level + 1) * 1000;
+  const progress = (xp / nextLevelXp) * 100;
+  return (
+    <div className="flex flex-col gap-1 w-full max-w-[200px]">
+      <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-slate-500">
+        <span>Level {level}</span>
+        <span>{xp} / {nextLevelXp} XP</span>
+      </div>
+      <div className="h-1.5 w-full bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
+        <motion.div 
+          initial={{ width: 0 }} 
+          animate={{ width: `${progress}%` }} 
+          className="h-full bg-brand-500" 
+        />
+      </div>
+    </div>
+  );
+}
 
 function StatCard({ icon: Icon, label, value, sub, colorByTheme, trend }) {
   const { theme } = useTheme();
@@ -70,6 +92,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [track, setTrack] = useState(user?.careerTrack || 'SDE');
 
   useEffect(() => {
     api.get('/dashboard')
@@ -77,6 +100,15 @@ export default function Dashboard() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+  const handleTrackChange = async (newTrack) => {
+    try {
+      setTrack(newTrack);
+      await api.put('/auth/profile', { careerTrack: newTrack });
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const getTimeUntilNext = (date) => {
     if (!date) return 'Flexible Schedule';
@@ -93,20 +125,34 @@ export default function Dashboard() {
   if (loading) return <PulseLoader />;
 
   return (
-    <div className="space-y-10 pb-12">
+    <div className="space-y-10 pb-12 relative">
+      <Copilot />
+
       {/* Hero Welcome */}
       <section className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
         <motion.div {...fadeIn(0)}>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-500 mb-3 ml-0.5">Welcome back, mentor</p>
+          <div className="flex items-center gap-4 mb-3">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-500">Welcome back, mentor</p>
+            <XpBar xp={user?.xp || 0} level={user?.level || 1} />
+          </div>
           <h1 className="text-4xl md:text-5xl font-display font-bold leading-[1.3] pb-2 dark:text-white light:text-slate-900">
             Master the Day, <br/>
             <span className="text-gradient leading-none">{user?.name?.split(' ')[0]}</span>
           </h1>
-          <p className="text-slate-500 mt-4 max-w-md text-sm leading-relaxed">
-            {data?.currentSession?.status === 'in-progress'
-              ? 'You have an active mentoring session waiting to be completed.'
-              : 'Your next intelligence evaluation is scheduled. Ready to sharpen your skills?'}
-          </p>
+          
+          <div className="flex items-center gap-3 mt-4">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Track:</span>
+            <select 
+              value={track} 
+              onChange={(e) => handleTrackChange(e.target.value)}
+              className="bg-slate-100 dark:bg-white/5 border-none text-xs font-bold rounded-lg px-3 py-1.5 focus:ring-1 ring-brand-500 dark:text-white"
+            >
+              <option value="SDE">Software Engineer</option>
+              <option value="Data Science">Data Science</option>
+              <option value="Product Management">Product Management</option>
+              <option value="General">Foundational</option>
+            </select>
+          </div>
         </motion.div>
         
         <motion.div {...fadeIn(0.1)} className="flex items-center gap-3">
@@ -127,7 +173,7 @@ export default function Dashboard() {
         <StatCard icon={Target} label="Sessions" value={data?.stats?.totalSessions || 0} />
         <StatCard icon={TrendingUp} label="Avg Score" value={`${data?.stats?.averageScore || 0}%`} trend={3.2} />
         <StatCard icon={Flame} label="Streak" value={`${data?.stats?.currentStreak || 0}`} sub="Current Week" />
-        <StatCard icon={Trophy} label="Best" value={`${data?.stats?.bestScore || 0}%`} />
+        <StatCard icon={Trophy} label="Rank" value={`#42`} sub="Global Leaderboard" />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6 md:gap-8">
@@ -135,7 +181,7 @@ export default function Dashboard() {
         <motion.div {...fadeIn(0.2)} className="lg:col-span-2 glass-card">
           <div className="flex items-center justify-between mb-10 pb-5 border-b dark:border-white/5 light:border-slate-100">
             <div>
-              <h2 className="text-xl font-bold dark:text-white light:text-slate-900">Performance Overview</h2>
+              <h2 className="text-xl font-bold dark:text-white light:text-slate-900">Performance Intelligence</h2>
               <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-widest font-bold">Latest session insights</p>
             </div>
             <div className="flex flex-col items-end">
@@ -147,9 +193,9 @@ export default function Dashboard() {
           {latestScores ? (
             <div className="flex flex-wrap items-center justify-around gap-y-10 py-4">
               <ScoreIndicator score={Math.round(latestScores.overall || 0)} label="Overall" color="#6366f1" />
-              <ScoreIndicator score={Math.round(latestScores.subjective || 0)} label="Subjective" color="#a855f7" />
-              <ScoreIndicator score={Math.round(latestScores.english || 0)} label="English" color="#06b6d4" />
-              <ScoreIndicator score={Math.round(latestScores.psychometric || 0)} label="Psych" color="#f59e0b" />
+              <ScoreIndicator score={Math.round(latestScores.confidence || 0)} label="Confidence" color="#6366f1" />
+              <ScoreIndicator score={Math.round(latestScores.clarity || 0)} label="Clarity" color="#a855f7" />
+              <ScoreIndicator score={Math.round(latestScores.consistency || 0)} label="Consistency" color="#06b6d4" />
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-center">

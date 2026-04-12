@@ -9,21 +9,56 @@ try {
 
 const MODEL = 'llama-3.1-8b-instant';
 
+const cache = new Map();
+
+// Helper: Robust JSON extraction from LLM strings
+function extractJSON(content) {
+  try {
+    // Try to find content between triple backticks (markdown json) or just the first { and last }
+    const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/);
+    const target = jsonMatch ? jsonMatch[1] : content;
+    
+    const startIdx = target.indexOf(target.trim().startsWith('[') ? '[' : '{');
+    const endIdx = target.lastIndexOf(target.trim().startsWith('[') ? ']' : '}');
+    
+    if (startIdx === -1 || endIdx === -1) return null;
+    return JSON.parse(target.substring(startIdx, endIdx + 1));
+  } catch (e) {
+    return null;
+  }
+}
+
 // Generate a chat completion
 async function chatCompletion(messages, maxTokens = 1024) {
   if (!groq || !process.env.GROQ_API_KEY) {
     return getMockResponse(messages);
   }
+
+  const cacheKey = JSON.stringify(messages);
+  if (cache.has(cacheKey)) return cache.get(cacheKey);
+
   try {
-    const completion = await groq.chat.completions.create({
+    // Add a race to handle hanging API calls
+    const timeout = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('AI Request Timeout')), 25000)
+    );
+
+    const completionPromise = groq.chat.completions.create({
       model: MODEL,
       messages,
       max_tokens: maxTokens,
       temperature: 0.7,
     });
-    return completion.choices[0]?.message?.content || '';
+
+    const completion = await Promise.race([completionPromise, timeout]);
+    const content = completion.choices[0]?.message?.content || '';
+    
+    cache.set(cacheKey, content);
+    setTimeout(() => cache.delete(cacheKey), 3600000);
+    
+    return content;
   } catch (error) {
-    console.error('Groq API error:', error.message);
+    console.error(`AI Service Error [${error.message}]`);
     return getMockResponse(messages);
   }
 }
@@ -69,18 +104,11 @@ Tone: Professional, technically grounded, and growth-oriented. Return ONLY a val
 [{"type":"subjective","subType":"general","questionText":"...","difficulty":"medium","order":1,"expectedDuration":120}]`;
 
   const content = await chatCompletion([{ role: 'user', content: prompt }], 2048);
-  
-  try {
-    const startIdx = content.indexOf('[');
-    const endIdx = content.lastIndexOf(']');
-    if (startIdx === -1 || endIdx === -1) return getMockQuestions(questionCount);
-    
-    const jsonStr = content.substring(startIdx, endIdx + 1);
-    let parsed = JSON.parse(jsonStr);
-    
-    if (!Array.isArray(parsed)) return getMockQuestions(questionCount);
+  let parsed = extractJSON(content);
 
-    // SAFETY SCAN: Production-ready keyword filter
+  if (!parsed || !Array.isArray(parsed)) return getMockQuestions(questionCount);
+
+  // SAFETY SCAN: Production-ready keyword filter
     const sensitivePattern = /vulgar|offensive|sexual|explicit|violent|hate|racist|death|kill/i;
     const safeParsed = parsed.filter(q => {
       const text = q.questionText || '';
@@ -150,17 +178,11 @@ Return ONLY a valid JSON object. Do not include any markdown, triple backticks, 
 } (Ensure all strings are properly escaped)`;
 
   const content = await chatCompletion([{ role: 'user', content: prompt }]);
+  const result = extractJSON(content);
+
+  if (!result) return getMockEvaluation();
   
-  try {
-    // Robust JSON extraction: Find the first '{' and the last '}'
-    const startIdx = content.indexOf('{');
-    const endIdx = content.lastIndexOf('}');
-    if (startIdx === -1 || endIdx === -1) throw new Error('No JSON object found');
-    
-    const jsonStr = content.substring(startIdx, endIdx + 1);
-    const result = JSON.parse(jsonStr);
-    
-    // Ensure personalityTraits exist
+  // Ensure personalityTraits exist
     const sensitivePattern = /vulgar|offensive|sexual|explicit|violent|hate|racist|death|kill/i;
     if (result.feedback && sensitivePattern.test(result.feedback)) {
        result.feedback = "Focus on technical rigor and structural clarity in your responses.";
@@ -225,15 +247,9 @@ Return ONLY valid JSON (no markdown), with this structure:
 }`;
 
   const content = await chatCompletion([{ role: 'user', content: prompt }]);
-  
-  try {
-    const startIdx = content.indexOf('{');
-    const endIdx = content.lastIndexOf('}');
-    if (startIdx === -1 || endIdx === -1) throw new Error('No JSON object found');
-    
-    const jsonStr = content.substring(startIdx, endIdx + 1);
-    return JSON.parse(jsonStr);
-  } catch {
+  const summary = extractJSON(content);
+
+  if (!summary) {
     return {
       overallFeedback: 'You demonstrated strong engagement throughout the session.',
       strengths: ['Clear communication', 'Thoughtful responses', 'Good time management'],
@@ -242,6 +258,7 @@ Return ONLY valid JSON (no markdown), with this structure:
       weeklyGoals: ['Practice active listening', 'Review grammar fundamentals'],
     };
   }
+  return summary;
 }
 
 // Mock fallbacks

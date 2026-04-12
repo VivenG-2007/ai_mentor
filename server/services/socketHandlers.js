@@ -57,7 +57,7 @@ function setupSocketHandlers(io) {
     
     // Avatar state change
     socket.on('avatar:state', (data) => {
-      socket.emit('avatar:stateChanged', data);
+      io.to(`user:${socket.userId}`).emit('avatar:stateChanged', data);
     });
     
     // Voice events

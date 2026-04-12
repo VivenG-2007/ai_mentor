@@ -189,27 +189,27 @@ export default function History() {
   const [selected, setSelected] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
-    const params = new URLSearchParams({ page, limit: 10 });
-    if (statusFilter) params.append('status', statusFilter);
+    window.scrollTo(0, 0);
+    const handler = setTimeout(() => {
+      setLoading(true);
+      const params = new URLSearchParams({ page, limit: 10 });
+      if (statusFilter) params.append('status', statusFilter);
+      if (search) params.append('search', search);
 
-    api.get(`/sessions?${params}`)
-      .then(r => {
-        setSessions(r.data.sessions);
-        setTotal(r.data.total);
-        setPages(r.data.pages);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [page, statusFilter]);
+      api.get(`/sessions?${params}`)
+        .then(r => {
+          setSessions(r.data.sessions);
+          setTotal(r.data.total);
+          setPages(r.data.pages);
+        })
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    }, 400); // 400ms debounce
 
-  const filtered = search
-    ? sessions.filter(s =>
-        `week ${s.weekNumber}`.includes(search.toLowerCase()) ||
-        s.status.includes(search.toLowerCase()) ||
-        String(s.year).includes(search)
-      )
-    : sessions;
+    return () => clearTimeout(handler);
+  }, [page, statusFilter, search]);
+
+  const filtered = sessions;
 
   if (loading) return <PulseLoader />;
 

@@ -102,7 +102,17 @@ mongoose.connect(process.env.MONGODB_URI, {
   .then(() => {
     logger.info('MongoDB connected successfully to Atlas');
     cron.schedule('0 9 * * 1', scheduleWeeklySessions);
-    const PORT = process.env.PORT || 5000;
+    // Keeping the free tier awake (UptimeRobot alternative)
+app.get('/ping', (req, res) => res.send('pong'));
+
+if (process.env.NODE_ENV === 'production') {
+  setInterval(() => {
+    require('https').get(process.env.BACKEND_URL + '/ping');
+    console.log('Self-ping executed to keep instance alive.');
+  }, 600000); // 10 minutes
+}
+
+const PORT = process.env.PORT || 5000;
     httpServer.listen(PORT, () => {
       logger.info(`AI Mentor Server running on port ${PORT}`, { environment: process.env.NODE_ENV || 'development' });
     });

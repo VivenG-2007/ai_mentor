@@ -41,6 +41,22 @@ const userSchema = new mongoose.Schema({
     push: { type: Boolean, default: true },
   },
   profession: { type: String, default: '' },
+  careerTrack: {
+    type: String,
+    enum: ['SDE', 'Data Science', 'Product Management', 'General'],
+    default: 'General',
+  },
+  xp: { type: Number, default: 0 },
+  level: { type: Number, default: 1 },
+  skills: {
+    type: Map,
+    of: Number,
+    default: {},
+  },
+  mentorPreference: {
+    tone: { type: String, enum: ['encouraging', 'rigorous', 'funny', 'professional'], default: 'professional' },
+    avatarId: { type: String, default: 'default' },
+  },
   goals: [String],
   weeklySessionDay: {
     type: Number,

@@ -31,6 +31,19 @@ const sessionSchema = new mongoose.Schema({
     subjective: { type: Number, default: 0 },
     english: { type: Number, default: 0 },
     psychometric: { type: Number, default: 0 },
+    confidence: { type: Number, default: 0 },
+    clarity: { type: Number, default: 0 },
+    consistency: { type: Number, default: 0 },
+  },
+  
+  mode: {
+    type: String,
+    enum: ['practice', 'timed', 'pressure'],
+    default: 'practice',
+  },
+  difficultyLevel: {
+    type: Number,
+    default: 1, // 1-10
   },
   
   personalityTraits: {
