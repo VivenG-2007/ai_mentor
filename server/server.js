@@ -31,6 +31,8 @@ const { questionsRouter, answersRouter } = require('./routes/questions');
 const reportRoutes = require('./routes/reports');
 const assistantRoutes = require('./routes/assistant');
 
+const { protect } = require('./middleware/auth');
+
 const { scheduleWeeklySessions } = require('./services/scheduler');
 const { setupSocketHandlers } = require('./services/socketHandlers');
 
