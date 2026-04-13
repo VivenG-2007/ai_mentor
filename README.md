@@ -75,7 +75,7 @@ cp .env.example .env.local
 ### 3. Run in Development
 
 ```bash
-# From root — runs both server and client concurrently
+# From root directory — runs both server and client concurrently
 npm run dev
 
 # Or separately:
