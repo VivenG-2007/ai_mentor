@@ -265,4 +265,4 @@ MIT — free to use and modify.
 - [React Three Fiber](https://r3f.docs.pmnd.rs) for Three.js/React integration
 - [Recharts](https://recharts.org) for beautiful chart components
 - [Framer Motion](https://www.framer.com/motion) for smooth animations
-"# ai_mentor" 
+"# ai_mentor by viven" 
